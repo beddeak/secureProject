@@ -7,6 +7,9 @@ CREATE TABLE department_memberships (
 
     joined_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
     CONSTRAINT fk_memberships_user
         FOREIGN KEY (user_id)
         REFERENCES users(id),
