@@ -11,6 +11,5 @@ public interface UserDepartmentMembershipRepository extends JpaRepository<UserDe
     List<UserDepartmentMembership> findByDepartment_Id(Long departmentId);
 
     Optional<UserDepartmentMembership> findByUser_IdAndDepartment_Id(Long userId, Long departmentId);
-
-    Optional<UserDepartmentMembership> findByUser_IdAndPrimaryDepartmentTrue(Long userId);
+    
 }
