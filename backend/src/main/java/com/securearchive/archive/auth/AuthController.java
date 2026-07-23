@@ -1,15 +1,16 @@
 package com.securearchive.archive.auth;
 
+import com.securearchive.archive.auth.dto.LoginRequest;
+import com.securearchive.archive.auth.dto.LoginResponse;
 import com.securearchive.archive.auth.dto.SignupRequest;
 import com.securearchive.archive.user.dto.UserResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,5 +22,9 @@ public class AuthController {
     public UserResponse signup(@Valid @RequestBody SignupRequest request) {
         return authService.signup(request);
     }
-    
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
+    }
 }

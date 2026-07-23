@@ -26,6 +26,7 @@ public class SecurityConfig {
                                 "/api/health",
                                 "/actuator/health",
                                 "/api/auth/signup",
+                                "/api/auth/login",
                                 "/api/departments/**",
                                 "/api/users/**")
                         .permitAll()
