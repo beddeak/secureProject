@@ -7,6 +7,7 @@ import com.securearchive.archive.auth.jwt.JwtTokenProvider;
 import com.securearchive.archive.user.User;
 import com.securearchive.archive.user.UserRepository;
 import com.securearchive.archive.user.dto.UserResponse;
+import com.securearchive.archive.auth.exception.InvalidCredentialsException;
 
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,15 +43,15 @@ public class AuthService {
         @Transactional(readOnly = true)
         public LoginResponse login(LoginRequest request) {
             User user = userRepository.findByEmail(request.email())
-                    .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다"));
+                    .orElseThrow(InvalidCredentialsException::new);
 
                 if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-                    throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다");
+                    throw new InvalidCredentialsException();
                 }
-
 
                 String accessToken = jwtTokenProvider.createAccessToken(user);
 
                 return LoginResponse.of(accessToken, user);
          }
+        
 }
