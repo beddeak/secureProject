@@ -6,8 +6,10 @@ import com.securearchive.archive.auth.dto.SignupRequest;
 import com.securearchive.archive.auth.jwt.JwtTokenProvider;
 import com.securearchive.archive.user.User;
 import com.securearchive.archive.user.UserRepository;
+import com.securearchive.archive.user.UserStatus;
 import com.securearchive.archive.user.dto.UserResponse;
 import com.securearchive.archive.auth.exception.InvalidCredentialsException;
+import com.securearchive.archive.auth.exception.DuplicateResourceException;
 
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,11 @@ public class AuthService {
 
         public UserResponse signup(SignupRequest request) {
             if (userRepository.existsByEmail(request.email())) {
-                throw new IllegalArgumentException("이미 사용 중인 이메일입니다");
+                throw new DuplicateResourceException("이미 사용 중인 이메일입니다");
             }
 
             if (userRepository.existsByNickname(request.nickname())) {
-                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다");
+                throw new DuplicateResourceException("이미 사용 중인 닉네임입니다");
             }
 
             User user = User.builder()
@@ -49,6 +51,9 @@ public class AuthService {
                     throw new InvalidCredentialsException();
                 }
 
+                if(user.getStatus() != UserStatus.ACTIVE) {
+                    throw new InvalidCredentialsException();
+                }
                 String accessToken = jwtTokenProvider.createAccessToken(user);
 
                 return LoginResponse.of(accessToken, user);

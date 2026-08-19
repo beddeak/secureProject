@@ -51,6 +51,8 @@ public class SecurityConfig {
                                 "/api/departments/**"
                         )
                         .permitAll()
+                        .requestMatchers("/api/users/**")
+                        .hasAnyRole("ADMINISTRATOR","VICE_ADMINISTRATOR")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(httpBasic -> httpBasic.disable())
