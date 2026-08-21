@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 public class SecurityConfig {
@@ -51,9 +52,16 @@ public class SecurityConfig {
                                 "/api/departments/**"
                         )
                         .permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/documents",
+                                "/api/documents/*"
+                        )
+                        .permitAll()
                         .requestMatchers("/api/users/**")
                         .hasAnyRole("ADMINISTRATOR","VICE_ADMINISTRATOR")
-                        .anyRequest().authenticated())
+                        .anyRequest()
+                        .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .build();
