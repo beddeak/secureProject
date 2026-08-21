@@ -4,7 +4,6 @@ import com.securearchive.archive.document.DocumentType;
 import com.securearchive.archive.department.dto.DepartmentResponse;
 import com.securearchive.archive.document.Document;
 import com.securearchive.archive.document.DocumentStatus;
-import com.securearchive.archive.user.dto.UserResponse;
 
 import java.time.LocalDateTime;
 
@@ -13,7 +12,7 @@ public record DocumentResponse(
     String documentCode,
     String title,
     DocumentType documentType,
-    UserResponse author,
+    DocumentAuthorResponse author,
     DepartmentResponse department,
     Integer requiredClearanceLevel,
     DocumentStatus status,
@@ -29,7 +28,7 @@ public record DocumentResponse(
             document.getDocumentCode(),
             document.getTitle(),
             document.getDocumentType(),
-            UserResponse.from(document.getAuthor()),
+            DocumentAuthorResponse.from(document.getAuthor()),
             document.getDepartment() == null
                 ? null
                 : DepartmentResponse.from(document.getDepartment()),

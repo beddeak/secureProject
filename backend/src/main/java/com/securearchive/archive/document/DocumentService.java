@@ -23,12 +23,15 @@ public class DocumentService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<DocumentResponse> getDocuments() {
-        return documentRepository.findAll()
+    public List<DocumentResponse> getDocuments(Integer clearanceLevel) {
+        return documentRepository
+            .findByStatusAndRequiredClearanceLevelLessThanEqualOrderByCreatedAtDesc(
+                DocumentStatus.PUBLISHED,
+                clearanceLevel
+            )
             .stream()
             .map(DocumentResponse::from)
             .toList();
-            
     }
     @Transactional
     public DocumentResponse createDocument(
@@ -65,4 +68,5 @@ public class DocumentService {
 
 
     }
+
 }

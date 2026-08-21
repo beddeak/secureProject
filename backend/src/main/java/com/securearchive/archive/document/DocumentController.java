@@ -25,11 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DocumentController {
     public final DocumentService documentService;
-
-    @GetMapping
-    public List<DocumentResponse> getDocuments() {
-        return documentService.getDocuments();
-    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DocumentResponse createDocument(
@@ -37,5 +32,12 @@ public class DocumentController {
         @AuthenticationPrincipal AuthenticatedUser user
     ) {
         return documentService.createDocument(request, user.id());
+    }
+    @GetMapping
+    public List<DocumentResponse> getDocument(@AuthenticationPrincipal AuthenticatedUser user)
+        {
+            int clearanceLevel = user == null ? 0 : user.clearanceLevel();
+
+            return documentService.getDocuments(clearanceLevel);
     }
 }
