@@ -1,5 +1,6 @@
 package com.securearchive.archive.document;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 import com.securearchive.archive.auth.exception.DuplicateResourceException;
@@ -67,6 +68,18 @@ public class DocumentService {
             return DocumentResponse.from(savedDocument);
 
 
+    }
+    @Transactional
+    public DocumentResponse publishDocument(Long documentId, Long requesterId) {
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 가 없습니다"));
+
+        if (!document.getAuthor().getId().equals(requesterId)) {
+            throw new AccessDeniedException("작성자만 문서를 공개할 수 있습니다");
+        }
+
+        document.publish();
+
+        return DocumentResponse.from(document);
     }
 
 }

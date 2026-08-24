@@ -63,4 +63,13 @@ public class Document {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void publish() {
+        if (status != DocumentStatus.DRAFT) {
+            throw new IllegalStateException("초안 상태의 문서만 공개할 수 있습니다");
+        }
+
+        status = DocumentStatus.PUBLISHED;
+            publishedAt = LocalDateTime.now();
+    }
 }
