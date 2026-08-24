@@ -81,5 +81,17 @@ public class DocumentService {
 
         return DocumentResponse.from(document);
     }
+    @Transactional(readOnly = true)
+    public DocumentResponse getDocument(Long documentId, Long requesterId, Integer clearanceLevel) {
+        Document document = documentRepository.findById(documentId).orElseThrow(() -> new IllegalArgumentException("문서를 찾을 수 없습니다"));
 
+        boolean isAuthor = requesterId != null && document.getAuthor().getId().equals(requesterId);
+
+        boolean canReadPublished = document.getStatus() == DocumentStatus.PUBLISHED && document.getRequiredClearanceLevel() <= clearanceLevel;
+        if(!isAuthor && !canReadPublished) {
+            throw new AccessDeniedException("문서를 열람할 권한이 없습니다");
+        }
+
+        return DocumentResponse.from(document);
+    }
 }

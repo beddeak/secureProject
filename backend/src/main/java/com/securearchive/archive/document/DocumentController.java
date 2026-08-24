@@ -49,4 +49,14 @@ public class DocumentController {
     ) {
         return documentService.publishDocument(documentId, user.id());
     }
+    @GetMapping("/{documentId}")
+    public DocumentResponse getDocuments(
+        @PathVariable("documentId") Long documentId,
+        @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        Long requesterId = user == null ? null : user.id();
+        int clearanceLevel = user == null ? 0 : user.clearanceLevel();
+
+        return documentService.getDocument(documentId, requesterId, clearanceLevel);
+    }
 }
