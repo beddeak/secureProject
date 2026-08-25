@@ -1,5 +1,6 @@
 package com.securearchive.archive.document;
 
+import com.securearchive.archive.document.exception.InvalidDocumentStateException;
 import com.securearchive.archive.user.User;
 import com.securearchive.archive.department.Department;
 import jakarta.persistence.*;
@@ -64,12 +65,61 @@ public class Document {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public void publish() {
-        if (status != DocumentStatus.DRAFT) {
-            throw new IllegalStateException("초안 상태의 문서만 공개할 수 있습니다");
+    public void submitForReview() {
+        if (status != DocumentStatus.DRAFT && status != DocumentStatus.REJECTED) {
+            throw new InvalidDocumentStateException("초안 또는 반려 상태의 문서만 검토 요청할 수 있습니다");
+        }
+
+        status = DocumentStatus.PENDING_REVIEW;
+    }
+
+    public void review() {
+        if (status != DocumentStatus.PENDING_REVIEW) {
+            throw new InvalidDocumentStateException("검토 대기 상태의 문서만 검토 완료할 수 있습니다");
+        }
+
+        status = DocumentStatus.REVIEWED;
+    }
+
+    public void approve() {
+        if (status != DocumentStatus.REVIEWED) {
+            throw new InvalidDocumentStateException("검토 완료 상태의 문서만 최종 승인할 수 있습니다");
         }
 
         status = DocumentStatus.PUBLISHED;
-            publishedAt = LocalDateTime.now();
+        publishedAt = LocalDateTime.now();
+    }
+
+    public void reject() {
+        if (status != DocumentStatus.PENDING_REVIEW && status != DocumentStatus.REVIEWED) {
+            throw new InvalidDocumentStateException("검토 중인 문서만 반려할 수 있습니다");
+        }
+
+        status = DocumentStatus.REJECTED;
+        publishedAt = null;
+    }
+
+    public void update(
+        String title,
+        Integer requiredClearanceLevel,
+        String summary,
+        String content
+    ) {
+        if (status == DocumentStatus.ARCHIVED) {
+            throw new InvalidDocumentStateException("보관된 문서는 수정할 수 없습니다");
+        }
+        if (status == DocumentStatus.PENDING_REVIEW || status == DocumentStatus.REVIEWED) {
+            throw new InvalidDocumentStateException("검토 중인 문서는 수정할 수 없습니다");
+        }
+
+        this.title = title;
+        this.requiredClearanceLevel = requiredClearanceLevel;
+        this.summary = summary;
+        this.content = content;
+
+        if (status == DocumentStatus.PUBLISHED || status == DocumentStatus.REJECTED) {
+            status = DocumentStatus.DRAFT;
+            publishedAt = null;
+        }
     }
 }

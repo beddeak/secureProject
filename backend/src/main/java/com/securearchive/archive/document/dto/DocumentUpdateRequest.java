@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 public record DocumentUpdateRequest(
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 200)
     String title,
 
     @NotNull

@@ -58,6 +58,13 @@ public class SecurityConfig {
                                 "/api/documents/*"
                         )
                         .permitAll()
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/documents/*/review",
+                                "/api/documents/*/approve",
+                                "/api/documents/*/reject"
+                        )
+                        .authenticated()
                         .requestMatchers("/api/users/**")
                         .hasAnyRole("ADMINISTRATOR","VICE_ADMINISTRATOR")
                         .anyRequest()
