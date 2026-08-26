@@ -60,7 +60,6 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
                                 HttpMethod.PATCH,
-                                "/api/documents/*/review",
                                 "/api/documents/*/approve",
                                 "/api/documents/*/reject"
                         )

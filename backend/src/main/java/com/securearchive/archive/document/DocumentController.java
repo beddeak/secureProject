@@ -86,14 +86,6 @@ public class DocumentController {
         return documentService.submitForReview(documentId, user.id());
     }
 
-    @PatchMapping("/{documentId}/review")
-    public DocumentResponse reviewDocument(
-        @PathVariable Long documentId,
-        @AuthenticationPrincipal AuthenticatedUser user
-    ) {
-        return documentService.reviewDocument(documentId, user.id(), user.role());
-    }
-
     @PatchMapping("/{documentId}/approve")
     public DocumentResponse approveDocument(
         @PathVariable Long documentId,

@@ -27,9 +27,8 @@
 - [x] 실제 소속 부서만 문서 담당 부서로 지정 가능
 - [x] 비로그인 사용자의 공개 Level-0 문서 열람
 - [x] 인가등급에 따른 공개 문서 열람 제한
-- [x] 문서 상태 흐름 `DRAFT -> PENDING_REVIEW -> REVIEWED -> PUBLISHED`
-- [x] `PENDING_REVIEW`, `REVIEWED` 문서 반려
-- [x] 같은 부서 Level-4 이상의 검토 및 반려
+- [x] 문서 상태 흐름 `DRAFT -> PENDING_REVIEW -> PUBLISHED`
+- [x] 같은 부서 Level-4 이상의 `PENDING_REVIEW` 문서 반려
 - [x] 같은 부서 Level-5 이상의 최종 승인
 - [x] 상위 전역 역할의 전체 부서 문서 처리
 - [x] 핵심 문서 상태 및 권한 테스트
@@ -119,8 +118,8 @@ PATCH /api/department-memberships/{membershipId}/leave
 ### 2-1. 문서 작업 목록
 
 - [ ] 내가 작성한 초안, 반려, 검토 중 문서 목록
-- [ ] 같은 부서 Level-4의 `PENDING_REVIEW` 목록
-- [ ] 같은 부서 Level-5의 `REVIEWED` 목록
+- [ ] 같은 부서 Level-4 이상의 `PENDING_REVIEW` 목록
+- [ ] Level-5의 최종 승인 대상 표시
 - [ ] 전역 관리자의 미배정 문서 검토 목록
 - [ ] 문서 상세 조회에도 작성자, 부서, 인가등급 검사 유지
 
@@ -129,7 +128,6 @@ PATCH /api/department-memberships/{membershipId}/leave
 ```text
 GET /api/documents/mine
 GET /api/documents/review-queue
-GET /api/documents/approval-queue
 ```
 
 ### 2-2. 검색과 목록 DTO
@@ -143,14 +141,14 @@ GET /api/documents/approval-queue
 ### 2-3. 문서 GET 보안 정리
 
 - [ ] 현재 공개 규칙인 `GET /api/documents/*` 범위를 좁히기
-- [ ] `/mine`, `/review-queue`, `/approval-queue`가 공개 경로로 잡히지 않게 처리
+- [ ] `/mine`, `/review-queue`가 공개 경로로 잡히지 않게 처리
 - [ ] 공개 완료 문서 목록과 공개 상세만 비로그인 허용
 - [ ] 개인 목록과 결재 목록은 반드시 로그인 요구
 
 ### Phase 2 완료 조건
 
 - 작성자가 작업 중인 모든 자기 문서를 찾을 수 있다.
-- Level-4와 Level-5가 현재 소속 부서의 문서만 확인한다.
+- Level-4와 Level-5가 현재 소속 부서의 검토 대기 문서만 확인한다.
 - 비로그인 사용자는 작업 목록에 접근할 수 없다.
 - 검색, 페이지네이션, 권한 테스트가 통과한다.
 
@@ -216,8 +214,8 @@ src/
 3. [ ] 공개 문서 목록과 상세
 4. [ ] 문서 작성과 수정
 5. [ ] 내 문서 목록
-6. [ ] Level-4 검토 및 반려 화면
-7. [ ] Level-5 최종 승인 화면
+6. [ ] Level-4 검토 대기 조회 및 반려 화면
+7. [ ] Level-5 최종 승인 및 반려 화면
 8. [ ] Level-5 부서 직원 관리 화면
 9. [ ] 전역 관리자 사용자 관리 화면
 
@@ -226,8 +224,8 @@ src/
 - 신규 사용자가 가입하고 로그인할 수 있다.
 - 부서 없는 Level-0 사용자가 미배정 문서를 작성할 수 있다.
 - 부서 직원이 부서 문서를 작성할 수 있다.
-- Level-4가 검토하거나 반려할 수 있다.
-- Level-5가 최종 승인할 수 있다.
+- Level-4가 같은 부서의 검토 대기 문서를 반려할 수 있다.
+- Level-5가 같은 부서의 문서를 최종 승인하거나 반려할 수 있다.
 - Level-5가 자기 부서의 하위 직원을 관리할 수 있다.
 - UI에서 숨긴 기능도 백엔드에서 다시 차단된다.
 
@@ -242,15 +240,14 @@ src/
 - [ ] 문서 결재 이벤트 테이블 추가
 - [ ] 처리자, 작업, 이전 상태, 다음 상태, 의견, 처리 시각 저장
 - [ ] 반려할 때 사유 입력 필수
-- [ ] 제출, 검토, 승인, 반려, 보관, 새 버전 생성 기록
-- [ ] 검토자와 최종 승인자를 다른 사람으로 강제할지 정책 확정
+- [ ] 제출, 승인, 반려, 보관, 새 버전 생성 기록
+- [ ] 작성자와 최종 승인자를 다른 사람으로 강제할지 정책 확정
 - [ ] 권한에 맞는 결재 타임라인 조회 API
 
 예상 작업 종류:
 
 ```text
 SUBMITTED
-REVIEWED
 APPROVED
 REJECTED
 ARCHIVED
@@ -413,4 +410,3 @@ Phase 1의 부서 직원 관리 기능을 다음 순서로 시작한다.
 4. 전역 관리자의 Level-5 부서장 임명 규칙
 5. Repository 및 Service 테스트
 6. Level-0과 Level-5 테스트 계정으로 실제 API 확인
-

@@ -9,14 +9,11 @@ import com.securearchive.archive.document.exception.InvalidDocumentStateExceptio
 
 class DocumentStateTests {
     @Test
-    void draftDocumentCanBeSubmittedReviewedAndApproved() {
+    void draftDocumentCanBeSubmittedAndApproved() {
         Document document = documentWithStatus(DocumentStatus.DRAFT);
 
         document.submitForReview();
         assertThat(document.getStatus()).isEqualTo(DocumentStatus.PENDING_REVIEW);
-
-        document.review();
-        assertThat(document.getStatus()).isEqualTo(DocumentStatus.REVIEWED);
 
         document.approve();
         assertThat(document.getStatus()).isEqualTo(DocumentStatus.PUBLISHED);
@@ -24,8 +21,8 @@ class DocumentStateTests {
     }
 
     @Test
-    void pendingDocumentCannotBeApprovedWithoutReview() {
-        Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
+    void draftDocumentCannotBeApproved() {
+        Document document = documentWithStatus(DocumentStatus.DRAFT);
 
         assertThatThrownBy(document::approve)
             .isInstanceOf(InvalidDocumentStateException.class);
@@ -42,15 +39,6 @@ class DocumentStateTests {
     }
 
     @Test
-    void reviewedDocumentCanBeRejected() {
-        Document document = documentWithStatus(DocumentStatus.REVIEWED);
-
-        document.reject();
-
-        assertThat(document.getStatus()).isEqualTo(DocumentStatus.REJECTED);
-    }
-
-    @Test
     void publishedDocumentReturnsToDraftWhenUpdated() {
         Document document = documentWithStatus(DocumentStatus.PUBLISHED);
 
@@ -64,14 +52,6 @@ class DocumentStateTests {
     @Test
     void pendingDocumentCannotBeUpdated() {
         Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
-
-        assertThatThrownBy(() -> document.update("수정 문서", 0, null, "수정 본문"))
-            .isInstanceOf(InvalidDocumentStateException.class);
-    }
-
-    @Test
-    void reviewedDocumentCannotBeUpdated() {
-        Document document = documentWithStatus(DocumentStatus.REVIEWED);
 
         assertThatThrownBy(() -> document.update("수정 문서", 0, null, "수정 본문"))
             .isInstanceOf(InvalidDocumentStateException.class);

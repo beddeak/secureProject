@@ -15,6 +15,7 @@ public interface UserDepartmentMembershipRepository extends JpaRepository<UserDe
     Optional<UserDepartmentMembership> findByUser_IdAndDepartment_Id(Long userId, Long departmentId);
 
     boolean existsByUser_IdAndDepartment_IdAndLeftAtIsNull(Long userId, Long departmentId);
+    boolean existsByUser_IdAndLeftAtIsNullAndDepartmentRank_Code(Long userId, String rankCode);
 
     @Query("""
         select count(m)

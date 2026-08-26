@@ -73,17 +73,9 @@ public class Document {
         status = DocumentStatus.PENDING_REVIEW;
     }
 
-    public void review() {
-        if (status != DocumentStatus.PENDING_REVIEW) {
-            throw new InvalidDocumentStateException("검토 대기 상태의 문서만 검토 완료할 수 있습니다");
-        }
-
-        status = DocumentStatus.REVIEWED;
-    }
-
     public void approve() {
-        if (status != DocumentStatus.REVIEWED) {
-            throw new InvalidDocumentStateException("검토 완료 상태의 문서만 최종 승인할 수 있습니다");
+        if (status != DocumentStatus.PENDING_REVIEW) {
+            throw new InvalidDocumentStateException("검토 대기 상태의 문서만 최종 승인할 수 있습니다");
         }
 
         status = DocumentStatus.PUBLISHED;
@@ -91,7 +83,7 @@ public class Document {
     }
 
     public void reject() {
-        if (status != DocumentStatus.PENDING_REVIEW && status != DocumentStatus.REVIEWED) {
+        if (status != DocumentStatus.PENDING_REVIEW) {
             throw new InvalidDocumentStateException("검토 중인 문서만 반려할 수 있습니다");
         }
 
@@ -108,7 +100,7 @@ public class Document {
         if (status == DocumentStatus.ARCHIVED) {
             throw new InvalidDocumentStateException("보관된 문서는 수정할 수 없습니다");
         }
-        if (status == DocumentStatus.PENDING_REVIEW || status == DocumentStatus.REVIEWED) {
+        if (status == DocumentStatus.PENDING_REVIEW) {
             throw new InvalidDocumentStateException("검토 중인 문서는 수정할 수 없습니다");
         }
 

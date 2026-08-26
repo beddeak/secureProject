@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.securearchive.archive.department.Department;
 import com.securearchive.archive.department.DepartmentRepository;
 import com.securearchive.archive.document.dto.DocumentCreateRequest;
+import com.securearchive.archive.membership.DepartmentPermissionService;
 import com.securearchive.archive.membership.UserDepartmentMembershipRepository;
 import com.securearchive.archive.user.User;
 import com.securearchive.archive.user.UserRepository;
@@ -39,6 +40,9 @@ class DocumentServiceAuthorizationTests {
 
     @Mock
     private UserDepartmentMembershipRepository membershipRepository;
+
+    @Mock
+    private DepartmentPermissionService departmentPermissionService;
 
     @InjectMocks
     private DocumentService documentService;
@@ -94,27 +98,8 @@ class DocumentServiceAuthorizationTests {
     }
 
     @Test
-    void levelFourCanReviewPendingDocument() {
-        Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
-        when(documentRepository.findById(DOCUMENT_ID)).thenReturn(Optional.of(document));
-        when(membershipRepository.countActiveMembershipsWithMinimumRank(
-            REVIEWER_ID,
-            DEPARTMENT_ID,
-            4
-        )).thenReturn(1L);
-
-        var response = documentService.reviewDocument(
-            DOCUMENT_ID,
-            REVIEWER_ID,
-            UserRole.USER
-        );
-
-        assertThat(response.status()).isEqualTo(DocumentStatus.REVIEWED);
-    }
-
-    @Test
     void levelFourCannotGiveFinalApproval() {
-        Document document = documentWithStatus(DocumentStatus.REVIEWED);
+        Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
         when(documentRepository.findById(DOCUMENT_ID)).thenReturn(Optional.of(document));
         when(membershipRepository.countActiveMembershipsWithMinimumRank(
             REVIEWER_ID,
@@ -125,13 +110,13 @@ class DocumentServiceAuthorizationTests {
         assertThatThrownBy(() -> documentService.approveDocument(
             DOCUMENT_ID,
             REVIEWER_ID,
-            UserRole.USER
+            UserRole.STAFF
         )).isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void levelFiveCanGiveFinalApproval() {
-        Document document = documentWithStatus(DocumentStatus.REVIEWED);
+        Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
         when(documentRepository.findById(DOCUMENT_ID)).thenReturn(Optional.of(document));
         when(membershipRepository.countActiveMembershipsWithMinimumRank(
             REVIEWER_ID,
@@ -142,7 +127,7 @@ class DocumentServiceAuthorizationTests {
         var response = documentService.approveDocument(
             DOCUMENT_ID,
             REVIEWER_ID,
-            UserRole.USER
+            UserRole.STAFF
         );
 
         assertThat(response.status()).isEqualTo(DocumentStatus.PUBLISHED);
@@ -162,7 +147,26 @@ class DocumentServiceAuthorizationTests {
         var response = documentService.rejectDocument(
             DOCUMENT_ID,
             REVIEWER_ID,
-            UserRole.USER
+            UserRole.STAFF
+        );
+
+        assertThat(response.status()).isEqualTo(DocumentStatus.REJECTED);
+    }
+
+    @Test
+    void levelFiveCanRejectDocumentUnderReview() {
+        Document document = documentWithStatus(DocumentStatus.PENDING_REVIEW);
+        when(documentRepository.findById(DOCUMENT_ID)).thenReturn(Optional.of(document));
+        when(membershipRepository.countActiveMembershipsWithMinimumRank(
+            REVIEWER_ID,
+            DEPARTMENT_ID,
+            4
+        )).thenReturn(1L);
+
+        var response = documentService.rejectDocument(
+            DOCUMENT_ID,
+            REVIEWER_ID,
+            UserRole.STAFF
         );
 
         assertThat(response.status()).isEqualTo(DocumentStatus.REJECTED);

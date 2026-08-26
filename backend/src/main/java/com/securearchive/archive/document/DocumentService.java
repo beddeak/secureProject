@@ -6,6 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.securearchive.archive.membership.DepartmentPermissionService;
 import com.securearchive.archive.auth.exception.DuplicateResourceException;
 import com.securearchive.archive.common.error.ResourceNotFoundException;
 import com.securearchive.archive.department.Department;
@@ -23,9 +24,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class DocumentService {
-    private static final int REVIEW_LEVEL = 4;
+    private static final int REVIEWER_LEVEL = 4;
     private static final int APPROVAL_LEVEL = 5;
 
+    private final DepartmentPermissionService departmentPermissionService;
     private final DocumentRepository documentRepository;
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
@@ -54,11 +56,10 @@ public class DocumentService {
 
         boolean isAuthor = requesterId != null
             && document.getAuthor().getId().equals(requesterId);
-        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterRole);
-        boolean isUnderReview = document.getStatus() == DocumentStatus.PENDING_REVIEW
-            || document.getStatus() == DocumentStatus.REVIEWED;
+        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterRole, requesterId);
+        boolean isUnderReview = document.getStatus() == DocumentStatus.PENDING_REVIEW;
         boolean hasDepartmentReviewAuthority = isUnderReview
-            && hasDepartmentAuthority(requesterId, document, REVIEW_LEVEL);
+            && hasDepartmentAuthority(requesterId, document, REVIEWER_LEVEL);
         boolean canReadPublished = document.getStatus() == DocumentStatus.PUBLISHED
             && document.getRequiredClearanceLevel() <= clearanceLevel;
 
@@ -126,7 +127,7 @@ public class DocumentService {
         Document document = findDocument(documentId);
 
         boolean isAuthor = document.getAuthor().getId().equals(requesterId);
-        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterRole);
+        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterRole, requesterId);
         if (!isAuthor && !hasGlobalAuthority) {
             throw new AccessDeniedException("문서를 수정할 권한이 없습니다");
         }
@@ -157,19 +158,6 @@ public class DocumentService {
     }
 
     @Transactional
-    public DocumentResponse reviewDocument(
-        Long documentId,
-        Long reviewerId,
-        UserRole reviewerRole
-    ) {
-        Document document = findDocument(documentId);
-        requireDepartmentAuthority(document, reviewerId, reviewerRole, REVIEW_LEVEL);
-
-        document.review();
-        return DocumentResponse.from(document);
-    }
-
-    @Transactional
     public DocumentResponse approveDocument(
         Long documentId,
         Long approverId,
@@ -189,7 +177,7 @@ public class DocumentService {
         UserRole reviewerRole
     ) {
         Document document = findDocument(documentId);
-        requireDepartmentAuthority(document, reviewerId, reviewerRole, REVIEW_LEVEL);
+        requireDepartmentAuthority(document, reviewerId, reviewerRole, REVIEWER_LEVEL);
 
         document.reject();
         return DocumentResponse.from(document);
@@ -206,14 +194,14 @@ public class DocumentService {
         UserRole role,
         int minimumLevel
     ) {
-        if (hasGlobalDocumentAuthority(role)) {
+        if (hasGlobalDocumentAuthority(role, userId)) {
             return;
         }
 
         if (!hasDepartmentAuthority(userId, document, minimumLevel)) {
             String message = minimumLevel == APPROVAL_LEVEL
                 ? "같은 부서의 Level-5 이상만 문서를 최종 승인할 수 있습니다"
-                : "같은 부서의 Level-4 이상만 문서를 검토하거나 반려할 수 있습니다";
+                : "같은 부서의 Level-4 이상만 문서를 반려할 수 있습니다";
             throw new AccessDeniedException(message);
         }
     }
@@ -234,10 +222,10 @@ public class DocumentService {
         ) > 0;
     }
 
-    private boolean hasGlobalDocumentAuthority(UserRole role) {
-        return role == UserRole.SITE_DIRECTOR
-            || role == UserRole.AION_COUNCIL
-            || role == UserRole.VICE_ADMINISTRATOR
-            || role == UserRole.ADMINISTRATOR;
+    private boolean hasGlobalDocumentAuthority(UserRole role, Long userId) {
+        if (role == UserRole.AION_COUNCIL) {
+            return departmentPermissionService.isActiveOverwatchCommander(userId);
+        }
+        return role == UserRole.SITE_DIRECTOR || role == UserRole.VICE_ADMINISTRATOR || role == UserRole.ADMINISTRATOR;
     }
 }
