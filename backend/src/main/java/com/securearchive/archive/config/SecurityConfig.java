@@ -48,8 +48,7 @@ public class SecurityConfig {
                                 "/api/health",
                                 "/actuator/health",
                                 "/api/auth/signup",
-                                "/api/auth/login",
-                                "/api/departments/**"
+                                "/api/auth/login"
                         )
                         .permitAll()
                         .requestMatchers(
@@ -59,13 +58,23 @@ public class SecurityConfig {
                         )
                         .permitAll()
                         .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/departments/**"
+                        )
+                        .permitAll()
+                        .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/documents/*/approve",
                                 "/api/documents/*/reject"
                         )
                         .authenticated()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/users/me/memberships"
+                        )
+                        .authenticated()
                         .requestMatchers("/api/users/**")
-                        .hasAnyRole("ADMINISTRATOR","VICE_ADMINISTRATOR")
+                        .hasAnyRole("ADMINISTRATOR","VICE_ADMINISTRATOR","SITE_DIRECTOR","AION_COUNCIL")
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -6,7 +6,7 @@ public record DepartmentRankResponse(
     Long id,
     String code,
     String name,
-    Integer LevelOrder,
+    Integer levelOrder,
     String description
 ) {
     public static DepartmentRankResponse from(DepartmentRank rank) {
