@@ -59,9 +59,15 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/departments/**"
+                                "/api/departments/",
+                                "/api/departments/*/ranks"
                         )
-                        .permitAll()
+                        .permitAll() 
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/departments/*/members"
+                        )
+                        .authenticated()
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/api/documents/*/approve",
