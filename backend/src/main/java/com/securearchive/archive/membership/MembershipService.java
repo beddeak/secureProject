@@ -33,7 +33,7 @@ public class MembershipService {
         UserRole requesterUserRole,
         Long departmentId
     ) {
-        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterUserRole, requesterId);
+        boolean hasGlobalAuthority = hasGlobalMemberAuthority(requesterUserRole, requesterId);
         boolean hasDepartmentAuthority = membershipRepository.countActiveMembershipsWithMinimumRank(requesterId, departmentId, MEMBER_VIEW_LEVEL) > 0;
 
         if (!hasGlobalAuthority && !hasDepartmentAuthority) {
@@ -45,7 +45,7 @@ public class MembershipService {
                 .map(DepartmentMemberResponse::from)
                 .toList();
     }
-    private boolean hasGlobalDocumentAuthority(UserRole role, Long userId) {
+    private boolean hasGlobalMemberAuthority(UserRole role, Long userId) {
         if (role == UserRole.AION_COUNCIL) {
             return departmentPermissionService.isActiveOverwatchCommander(userId);
         }
