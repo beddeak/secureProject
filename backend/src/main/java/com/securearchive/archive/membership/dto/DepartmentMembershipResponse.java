@@ -6,7 +6,6 @@ import com.securearchive.archive.department.dto.DepartmentRankResponse;
 import com.securearchive.archive.department.dto.DepartmentResponse;
 import com.securearchive.archive.membership.UserDepartmentMembership;
 
-
 public record DepartmentMembershipResponse(
     Long id,
     DepartmentResponse department,

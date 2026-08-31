@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserDepartmentMembershipRepository extends JpaRepository<UserDepartmentMembership, Long> {
     List<UserDepartmentMembership> findByUser_Id(Long userId);
 
-    List<UserDepartmentMembership> findByDepartment_Id(Long departmentId);
+    List<UserDepartmentMembership> findByDepartment_IdAndLeftAtIsNull(Long departmentId);
 
     List<UserDepartmentMembership> findByUser_IdAndLeftAtIsNull(Long userId);
 
