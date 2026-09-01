@@ -1,0 +1,8 @@
+export { default as DepartmentsPage } from './DepartmentsPage'
+export { default as DocumentDetailPage } from './DocumentDetailPage'
+export { default as DocumentEditorPage } from './DocumentEditorPage'
+export { default as DocumentsPage } from './DocumentsPage'
+export { default as LoginPage } from './LoginPage'
+export { default as NotFoundPage } from './NotFoundPage'
+export { default as PersonnelPage } from './PersonnelPage'
+export { default as SignupPage } from './SignupPage'

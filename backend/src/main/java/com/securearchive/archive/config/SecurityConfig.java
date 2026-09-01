@@ -59,7 +59,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
-                                "/api/departments/",
+                                "/api/departments",
                                 "/api/departments/*/ranks"
                         )
                         .permitAll() 

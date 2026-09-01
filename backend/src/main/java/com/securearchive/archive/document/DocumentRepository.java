@@ -11,9 +11,5 @@ public interface DocumentRepository extends JpaRepository<Document, Long>{
 
     boolean existsByDocumentCode(String document);
 
-    List<Document>
-    findByStatusAndRequiredClearanceLevelLessThanEqualOrderByCreatedAtDesc(
-        DocumentStatus status,
-        Integer clearanceLevel
-    );
+    List<Document> findAllByOrderByCreatedAtDesc();
 }

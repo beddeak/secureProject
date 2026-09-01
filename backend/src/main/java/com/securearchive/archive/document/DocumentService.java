@@ -34,13 +34,17 @@ public class DocumentService {
     private final UserDepartmentMembershipRepository membershipRepository;
 
     @Transactional(readOnly = true)
-    public List<DocumentResponse> getDocuments(Integer clearanceLevel) {
-        return documentRepository
-            .findByStatusAndRequiredClearanceLevelLessThanEqualOrderByCreatedAtDesc(
-                DocumentStatus.PUBLISHED,
-                clearanceLevel
-            )
+    public List<DocumentResponse> getDocuments(Long requesterId, UserRole requesterRole ,Integer clearanceLevel) {
+        boolean hasGlobalAuthority = hasGlobalDocumentAuthority(requesterRole, requesterId);
+        return documentRepository.findAllByOrderByCreatedAtDesc()
             .stream()
+            .filter(document -> {
+                boolean isPublishedAndAccessible = document.getStatus() == DocumentStatus.PUBLISHED && document.getRequiredClearanceLevel() <= clearanceLevel;
+                boolean isAuthor = requesterId != null && document.getAuthor().getId().equals(requesterId);
+                boolean canReview = document.getStatus() == DocumentStatus.PENDING_REVIEW && hasDepartmentAuthority(requesterId, document, REVIEWER_LEVEL);
+
+                return isPublishedAndAccessible || isAuthor || hasGlobalAuthority || canReview;
+            })
             .map(DocumentResponse::from)
             .toList();
     }

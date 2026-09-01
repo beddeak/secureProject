@@ -33,8 +33,11 @@ public class DocumentController {
     public List<DocumentResponse> getDocuments(
         @AuthenticationPrincipal AuthenticatedUser user
     ) {
-        int clearanceLevel = user == null ? 0 : user.clearanceLevel();
-        return documentService.getDocuments(clearanceLevel);
+        Long requesterId = user == null ? null : user.id();
+        UserRole requesterRole = user == null ? null : user.role();
+        int clearanceLevel = user == null ? null : user.clearanceLevel();
+
+        return documentService.getDocuments(requesterId, requesterRole, clearanceLevel);
     }
 
     @GetMapping("/{documentId}")
