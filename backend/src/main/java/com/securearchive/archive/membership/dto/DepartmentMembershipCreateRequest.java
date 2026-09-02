@@ -1,4 +1,4 @@
-package com.securearchive.archive.membership;
+package com.securearchive.archive.membership.dto;
 
 import jakarta.validation.constraints.NotNull;
 
